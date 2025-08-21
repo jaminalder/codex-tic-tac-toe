@@ -10,6 +10,7 @@ import (
     "strings"
     "testing"
     "time"
+    "sync"
 
     "github.com/jaminalder/codex-tic-tac-toe/internal/app"
     "github.com/go-chi/chi/v5"
@@ -167,12 +168,22 @@ type flushRecorder struct {
     header http.Header
     code   int
     buf    bytes.Buffer
+    mu     sync.Mutex
 }
 
-func (f *flushRecorder) Header() http.Header         { return f.header }
-func (f *flushRecorder) WriteHeader(code int)        { f.code = code }
-func (f *flushRecorder) Write(p []byte) (int, error) { return f.buf.Write(p) }
-func (f *flushRecorder) Flush()                      {}
+func (f *flushRecorder) Header() http.Header  { return f.header }
+func (f *flushRecorder) WriteHeader(code int) { f.code = code }
+func (f *flushRecorder) Write(p []byte) (int, error) {
+    f.mu.Lock()
+    defer f.mu.Unlock()
+    return f.buf.Write(p)
+}
+func (f *flushRecorder) Flush() {}
+func (f *flushRecorder) String() string {
+    f.mu.Lock()
+    defer f.mu.Unlock()
+    return f.buf.String()
+}
 
 func TestEventsBroadcastsBoardOnPlay(t *testing.T) {
     svc, _ := newTestServer(t)
@@ -208,13 +219,14 @@ func TestEventsBroadcastsBoardOnPlay(t *testing.T) {
     // Poll buffer for an event
     deadline := time.Now().Add(2 * time.Second)
     for time.Now().Before(deadline) {
-        if strings.Contains(rw.buf.String(), "event: board") && strings.Contains(rw.buf.String(), "data: board") {
+            s := rw.String()
+        if strings.Contains(s, "event: board") && strings.Contains(s, "data: board") {
             break
         }
         time.Sleep(10 * time.Millisecond)
     }
-    if !strings.Contains(rw.buf.String(), "event: board") {
-        t.Fatalf("expected board event, got: %q", rw.buf.String())
+    if !strings.Contains(rw.String(), "event: board") {
+        t.Fatalf("expected board event, got: %q", rw.String())
     }
 }
 
@@ -241,14 +253,14 @@ func TestEventsHeartbeat(t *testing.T) {
 
     deadline := time.Now().Add(500 * time.Millisecond)
     for time.Now().Before(deadline) {
-        if strings.Contains(rw.buf.String(), ": ping") {
+        if strings.Contains(rw.String(), ": ping") {
             break
         }
         time.Sleep(10 * time.Millisecond)
     }
     cancel()
-    if !strings.Contains(rw.buf.String(), ": ping") {
-        t.Fatalf("expected heartbeat ping, got: %q", rw.buf.String())
+    if !strings.Contains(rw.String(), ": ping") {
+        t.Fatalf("expected heartbeat ping, got: %q", rw.String())
     }
 }
 

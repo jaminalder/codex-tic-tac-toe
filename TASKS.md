@@ -13,7 +13,7 @@
 6) Implement HTTP server, routes, templates — completed
 7) Implement SSE events + heartbeats — completed
 8) Render board fragment + inline errors — completed
-9) Run race detector and iterate — pending
+9) Run race detector and iterate — completed
 
 Notes
 - Keep this file updated as tasks progress (pending → in_progress → completed).
