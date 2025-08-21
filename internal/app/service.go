@@ -57,6 +57,17 @@ func NewServiceWithRenderer(renderer func(GameState) []byte) *Service {
     }
 }
 
+// SetRenderer replaces the broadcast renderer function.
+func (s *Service) SetRenderer(renderer func(GameState) []byte) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+    if renderer == nil {
+        s.render = func(gs GameState) []byte { return nil }
+        return
+    }
+    s.render = renderer
+}
+
 // CreateGame creates and registers a new game.
 func (s *Service) CreateGame() (*GameState, error) {
     s.mu.Lock()

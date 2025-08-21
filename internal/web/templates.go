@@ -52,11 +52,13 @@ func renderTemplate(t *template.Template, name string, data any) []byte {
 
 const boardTemplate = `
 <div id="board">
+  {{if .Error}}
+  <div class="alert">{{.Error}}</div>
+  {{end}}
   {{/* 3x3 grid */}}
   {{range $r := iter 3}}
   <div class="row">
     {{range $c := iter 3}}
-      {{ $i := add (mul $r 3) $c }}
       <form hx-post="/game/{{.ID}}/play" hx-target="#board" hx-swap="outerHTML" method="post">
         <input type="hidden" name="r" value="{{$r}}">
         <input type="hidden" name="c" value="{{$c}}">

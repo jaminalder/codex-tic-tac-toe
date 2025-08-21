@@ -1,6 +1,7 @@
 package web
 
 import (
+    "errors"
     "fmt"
     "io"
     "net/http"
@@ -9,6 +10,7 @@ import (
 
     "github.com/go-chi/chi/v5"
     "github.com/jaminalder/codex-tic-tac-toe/internal/app"
+    "github.com/jaminalder/codex-tic-tac-toe/internal/domain"
 )
 
 type handlers struct {
@@ -67,8 +69,9 @@ func (h *handlers) join(w http.ResponseWriter, r *http.Request) {
         return
     }
     data := struct {
-        ID   string
-        Game struct{ Board any }
+        ID    string
+        Game  struct{ Board any }
+        Error string
     }{ID: gs.ID}
     data.Game.Board = gs.Game.Board
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -84,10 +87,24 @@ func (h *handlers) play(w http.ResponseWriter, r *http.Request) {
     ri, _ := strconv.Atoi(rStr)
     ci, _ := strconv.Atoi(cStr)
     gs, err := h.svc.Play(id, pid, ri, ci)
+    var errMsg string
     if err != nil {
-        // For HTMX contract, still return board with potential alert in future; for now just return board
         if gs == nil {
             if g, ok := h.svc.Get(id); ok { gs = g }
+        }
+        switch {
+        case errors.Is(err, app.ErrNotYourTurn):
+            errMsg = "Not your turn"
+        case errors.Is(err, app.ErrNotAPlayer):
+            errMsg = "You are a spectator"
+        case errors.Is(err, domain.ErrOccupied):
+            errMsg = "Cell is occupied"
+        case errors.Is(err, domain.ErrOutOfBounds):
+            errMsg = "Out of bounds"
+        case errors.Is(err, domain.ErrGameOver):
+            errMsg = "Game is over"
+        default:
+            errMsg = "Invalid move"
         }
     }
     if gs == nil {
@@ -95,13 +112,17 @@ func (h *handlers) play(w http.ResponseWriter, r *http.Request) {
         return
     }
     data := struct {
-        ID   string
-        Game struct{ Board any }
+        ID    string
+        Game  struct{ Board any }
+        Error string
     }{ID: gs.ID}
     data.Game.Board = gs.Game.Board
+    data.Error = errMsg
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     _, _ = w.Write(renderTemplate(h.tpl.board, "", data))
 }
+
+var heartbeatInterval = 15 * time.Second
 
 func (h *handlers) events(w http.ResponseWriter, r *http.Request) {
     id := chi.URLParam(r, "id")
@@ -121,7 +142,7 @@ func (h *handlers) events(w http.ResponseWriter, r *http.Request) {
     ctx := r.Context()
     ch, _ := h.svc.Subscribe(ctx, id)
     // heartbeat ticker
-    ticker := time.NewTicker(15 * time.Second)
+    ticker := time.NewTicker(heartbeatInterval)
     defer ticker.Stop()
     // Initial flush of headers
     flusher.Flush()

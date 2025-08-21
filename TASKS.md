@@ -11,8 +11,8 @@
 5) Write web handler tests (SSR/HTMX) — completed
    - statuses, fragment rendering, cookie/auto-claim
 6) Implement HTTP server, routes, templates — completed
-7) Implement SSE events + heartbeats — in_progress
-8) Render board fragment + inline errors — pending
+7) Implement SSE events + heartbeats — completed
+8) Render board fragment + inline errors — completed
 9) Run race detector and iterate — pending
 
 Notes
