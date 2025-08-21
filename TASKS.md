@@ -8,10 +8,10 @@
    - turn enforcement + play updates
    - subscribe/broadcast fan-out; drop slow subs
 4) Implement service (UUID, seats, mutex, snapshot fan-out) — completed
-5) Write web handler tests (SSR/HTMX) — pending
+5) Write web handler tests (SSR/HTMX) — completed
    - statuses, fragment rendering, cookie/auto-claim
-6) Implement HTTP server, routes, templates — pending
-7) Implement SSE events + heartbeats — pending
+6) Implement HTTP server, routes, templates — completed
+7) Implement SSE events + heartbeats — in_progress
 8) Render board fragment + inline errors — pending
 9) Run race detector and iterate — pending
 
