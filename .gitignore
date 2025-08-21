@@ -1,0 +1,50 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.prof
+*.pprof
+
+# Common build output locations
+bin/
+build/
+dist/
+tmp/
+
+# Go workspace files (do not commit local workspaces)
+go.work
+go.work.sum
+
+# Coverage and test outputs
+coverage.*
+*.cov
+*.coverprofile
+profile.cov
+
+# Logs
+*.log
+
+# Editor/IDE settings
+.vscode/
+.idea/
+*.iml
+.fleet/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment files (keep examples)
+.env
+.env.*
+!.env.example
+
+# Local binaries built next to packages (e.g., cmd/ttt-server/ttt-server)
+cmd/**/ttt
+cmd/**/ttt-server
+ttt
+ttt-server
