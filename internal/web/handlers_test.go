@@ -87,6 +87,43 @@ func TestGamePageSetsCookieAndAutoClaims(t *testing.T) {
     }
 }
 
+func TestGamePageRendersPlayableBoard(t *testing.T) {
+    svc, h := newTestServer(t)
+    gs, _ := svc.CreateGame()
+    req := httptest.NewRequest("GET", "/game/"+gs.ID, nil)
+    rr := httptest.NewRecorder()
+    h.ServeHTTP(rr, req)
+    if rr.Code != http.StatusOK {
+        t.Fatalf("expected 200, got %d", rr.Code)
+    }
+    body := rr.Body.String()
+    // SSE connect points to this game's events
+    if !strings.Contains(body, "/game/"+gs.ID+"/events") {
+        t.Fatalf("missing SSE connect for game id; body=%q", body)
+    }
+    // Board root has correct id and SSE swap attributes
+    if !strings.Contains(body, "id=\"board\"") || !strings.Contains(body, "hx-sse=\"swap:board\"") || !strings.Contains(body, "hx-swap=\"outerHTML\"") {
+        t.Fatalf("board root missing required attributes; body=%q", body)
+    }
+    // There should be nine cell forms targeting this game's play URL
+    want := `hx-post="/game/` + gs.ID + `/play"`
+    if cnt := strings.Count(body, want); cnt != 9 {
+        t.Logf("BODY: %s", body)
+        t.Fatalf("expected 9 cell forms for this game, got %d", cnt)
+    }
+}
+
+func TestRenderBoardFragmentHasPlayURLs(t *testing.T) {
+    svc := app.NewService()
+    h := &handlers{svc: svc, tpl: loadTemplates()}
+    gs, _ := svc.CreateGame()
+    html := string(h.renderBoard(*gs, ""))
+    want := `hx-post="/game/` + gs.ID + `/play"`
+    if cnt := strings.Count(html, want); cnt != 9 {
+        t.Fatalf("rendered board should have 9 play forms, got %d; html=%q", cnt, html)
+    }
+}
+
 func TestJoinEndpointReturnsBoardFragment(t *testing.T) {
     svc, h := newTestServer(t)
     gs, _ := svc.CreateGame()

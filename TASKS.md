@@ -15,6 +15,7 @@
 8) Render board fragment + inline errors — completed
 9) Run race detector and iterate — completed
 10) Add server entrypoint (cmd/ttt-server) — completed
+11) SSR game page renders playable board — completed
 
 Notes
 - Keep this file updated as tasks progress (pending → in_progress → completed).

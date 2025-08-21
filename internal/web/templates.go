@@ -40,7 +40,7 @@ func loadTemplates() *templates {
     index := template.Must(template.Must(base.Clone()).New("content").Parse(`<h1>TicTacToe</h1><form action="/game" method="post"><button>Create</button></form>`))
     game := template.Must(template.Must(base.Clone()).New("content").Parse(`
 <div hx-ext="sse" hx-sse="connect:/game/{{.Game.ID}}/events">
-  <div id="board" hx-sse="swap:board">{{template "board" .}}</div>
+  {{.BoardHTML}}
 </div>`))
     // Standalone board template used for fragment rendering
     board := template.Must(template.New("board_only").Funcs(funcs()).Parse(boardTemplate))
@@ -58,18 +58,19 @@ func renderTemplate(t *template.Template, name string, data any) []byte {
 }
 
 const boardTemplate = `
-<div id="board">
-  {{if .Error}}
-  <div class="alert">{{.Error}}</div>
+<div id="board" hx-sse="swap:board" hx-swap="outerHTML">
+  {{ $root := . }}
+  {{if $root.Error}}
+  <div class="alert">{{$root.Error}}</div>
   {{end}}
   {{/* 3x3 grid */}}
   {{range $r := iter 3}}
   <div class="row">
     {{range $c := iter 3}}
-      <form hx-post="/game/{{.ID}}/play" hx-target="#board" hx-swap="outerHTML" method="post">
+      <form hx-post="/game/{{$root.ID}}/play" hx-target="#board" hx-swap="outerHTML" method="post">
         <input type="hidden" name="r" value="{{$r}}">
         <input type="hidden" name="c" value="{{$c}}">
-        <button type="submit">{{cellSymbol (index .Game.Board (add (mul $r 3) $c))}}</button>
+        <button type="submit">{{cellSymbol (index $root.Game.Board (add (mul $r 3) $c))}}</button>
       </form>
     {{end}}
   </div>

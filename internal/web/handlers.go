@@ -3,6 +3,7 @@ package web
 import (
     "errors"
     "fmt"
+    "html/template"
     "io"
     "net/http"
     "strconv"
@@ -55,14 +56,12 @@ func (h *handlers) view(w http.ResponseWriter, r *http.Request) {
         return
     }
     data := struct {
-        ID   string
-        Game struct {
-            ID    string
-            Board any
-        }
+        ID        string
+        Game      struct{ ID string }
+        BoardHTML template.HTML
     }{ID: gs.ID}
     data.Game.ID = gs.ID
-    data.Game.Board = gs.Game.Board
+    data.BoardHTML = template.HTML(h.renderBoard(*gs, ""))
 
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     w.WriteHeader(http.StatusOK)
