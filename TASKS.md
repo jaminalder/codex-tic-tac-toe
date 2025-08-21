@@ -1,0 +1,20 @@
+# TASKS.md — Test-Driven Plan
+
+1) Write domain tests (wins/draw/illegal) — completed
+2) Implement domain Game/Board/Play — completed
+3) Write app service tests suite — in_progress
+   - create/get
+   - join seats + rejoin keeps seat
+   - turn enforcement + play updates
+   - subscribe/broadcast fan-out; drop slow subs
+4) Implement service (UUID, seats, mutex, snapshot fan-out) — pending
+5) Write web handler tests (SSR/HTMX) — pending
+   - statuses, fragment rendering, cookie/auto-claim
+6) Implement HTTP server, routes, templates — pending
+7) Implement SSE events + heartbeats — pending
+8) Render board fragment + inline errors — pending
+9) Run race detector and iterate — pending
+
+Notes
+- Keep this file updated as tasks progress (pending → in_progress → completed).
+- Source of truth mirrors the in-tool plan.
