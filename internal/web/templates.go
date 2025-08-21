@@ -30,13 +30,20 @@ func funcs() template.FuncMap {
 
 func loadTemplates() *templates {
     // Minimal inline templates to satisfy tests; can be replaced by file loading later.
-    base := template.Must(template.New("base").Funcs(funcs()).Parse(`<!doctype html><html><body>{{template "content" .}}</body></html>`))
+    base := template.Must(template.New("base").Funcs(funcs()).Parse(`<!doctype html><html><head>
+<meta charset="utf-8"/>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+</head><body>{{template "content" .}}</body></html>`))
+    // Define the board template within the same set so game can include it
+    template.Must(base.New("board").Funcs(funcs()).Parse(boardTemplate))
     index := template.Must(template.Must(base.Clone()).New("content").Parse(`<h1>TicTacToe</h1><form action="/game" method="post"><button>Create</button></form>`))
     game := template.Must(template.Must(base.Clone()).New("content").Parse(`
 <div hx-ext="sse" hx-sse="connect:/game/{{.Game.ID}}/events">
-  <div id="board" hx-sse="swap:board"></div>
+  <div id="board" hx-sse="swap:board">{{template "board" .}}</div>
 </div>`))
-    board := template.Must(template.New("board").Funcs(funcs()).Parse(boardTemplate))
+    // Standalone board template used for fragment rendering
+    board := template.Must(template.New("board_only").Funcs(funcs()).Parse(boardTemplate))
     return &templates{base: base, game: game, board: board, index: index}
 }
 

@@ -11,6 +11,8 @@ import (
 func NewServer(s *app.Service) http.Handler {
     r := chi.NewRouter()
     h := &handlers{svc: s, tpl: loadTemplates()}
+    // Ensure SSE broadcasts render the board fragment HTML
+    s.SetRenderer(func(gs app.GameState) []byte { return h.renderBoard(gs, "") })
     r.Get("/", h.index)
     r.Post("/game", h.create)
     r.Route("/game/{id}", func(r chi.Router) {
@@ -21,4 +23,3 @@ func NewServer(s *app.Service) http.Handler {
     })
     return r
 }
-

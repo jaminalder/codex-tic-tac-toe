@@ -18,6 +18,16 @@ type handlers struct {
     tpl *templates
 }
 
+func (h *handlers) renderBoard(gs app.GameState, errMsg string) []byte {
+    data := struct {
+        ID    string
+        Game  struct{ Board any }
+        Error string
+    }{ID: gs.ID, Error: errMsg}
+    data.Game.Board = gs.Game.Board
+    return renderTemplate(h.tpl.board, "", data)
+}
+
 func (h *handlers) index(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     w.WriteHeader(http.StatusOK)
@@ -68,14 +78,8 @@ func (h *handlers) join(w http.ResponseWriter, r *http.Request) {
         http.NotFound(w, r)
         return
     }
-    data := struct {
-        ID    string
-        Game  struct{ Board any }
-        Error string
-    }{ID: gs.ID}
-    data.Game.Board = gs.Game.Board
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    _, _ = w.Write(renderTemplate(h.tpl.board, "", data))
+    _, _ = w.Write(h.renderBoard(*gs, ""))
 }
 
 func (h *handlers) play(w http.ResponseWriter, r *http.Request) {
@@ -115,9 +119,8 @@ func (h *handlers) play(w http.ResponseWriter, r *http.Request) {
         ID    string
         Game  struct{ Board any }
         Error string
-    }{ID: gs.ID}
+    }{ID: gs.ID, Error: errMsg}
     data.Game.Board = gs.Game.Board
-    data.Error = errMsg
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     _, _ = w.Write(renderTemplate(h.tpl.board, "", data))
 }
