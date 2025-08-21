@@ -7,6 +7,7 @@ import (
     "time"
 
     "github.com/jaminalder/codex-tic-tac-toe/internal/domain"
+    "github.com/google/uuid"
 )
 
 // Errors exposed by the service layer.
@@ -60,7 +61,7 @@ func NewServiceWithRenderer(renderer func(GameState) []byte) *Service {
 func (s *Service) CreateGame() (*GameState, error) {
     s.mu.Lock()
     defer s.mu.Unlock()
-    id := newUUID()
+    id := uuid.NewString()
     now := time.Now()
     gs := &GameState{ID: id, Game: domain.New(), Created: now, Updated: now}
     s.games[id] = gs
