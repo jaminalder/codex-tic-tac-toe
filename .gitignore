@@ -25,6 +25,10 @@ coverage.*
 *.coverprofile
 profile.cov
 
+# Local caches
+.gocache/
+.gomodcache/
+
 # Logs
 *.log
 

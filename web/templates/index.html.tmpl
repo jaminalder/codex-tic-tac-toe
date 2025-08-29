@@ -1,0 +1,16 @@
+{{ define "content" }}
+<h1 class="title">Tic‑Tac‑Toe</h1>
+<p class="subtitle">A simple SSR Go app (web layer WIP)</p>
+
+<div class="box">
+  <p>Welcome! The game UI and realtime updates are coming next.</p>
+  <p class="mt-3">
+    <button class="button is-primary" disabled>New Game (coming soon)</button>
+  </p>
+  <p class="is-size-7 has-text-grey mt-3">Bulma, HTMX, and Alpine are loaded via CDN.</p>
+  <p class="is-size-7 has-text-grey">This page is served by the stdlib `net/http` server.</p>
+  </div>
+{{ end }}
+
+{{ template "base.html.tmpl" . }}
+
