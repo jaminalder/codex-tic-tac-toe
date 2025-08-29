@@ -1,12 +1,14 @@
 {{ define "content" }}
 <h1 class="title">Game</h1>
-<p class="subtitle">Click a cell to place a random X or O</p>
+<p class="subtitle">Click a cell to place your chosen icon</p>
 
 <div class="box" x-data="{ 
     cells: Array(9).fill(''), 
-    mark(i){ if(this.cells[i] !== '') return; this.cells[i] = Math.random() < 0.5 ? 'X' : 'O' }, 
+    icon: (new URLSearchParams(window.location.search).get('icon') || '❌'),
+    mark(i){ if(this.cells[i] !== '') return; this.cells[i] = this.icon }, 
     reset(){ this.cells = Array(9).fill('') }
   }">
+  <p class="mb-3">Your icon: <span x-text="icon"></span></p>
   <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-width: 360px;">
     <button type="button" class="button is-large is-fullwidth" x-text="cells[0]" @click="mark(0)"></button>
     <button type="button" class="button is-large is-fullwidth" x-text="cells[1]" @click="mark(1)"></button>
