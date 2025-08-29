@@ -4,27 +4,55 @@ import (
     "html/template"
     "log"
     "net/http"
+    "os"
+    "path/filepath"
 )
 
 type templates struct {
-    t *template.Template
+    index *template.Template
+    game  *template.Template
 }
 
 func mustLoadTemplates() *templates {
     funcs := template.FuncMap{}
-    // Load base first, then pages.
-    t := template.Must(template.New("base.html.tmpl").Funcs(funcs).ParseFiles(
-        "web/templates/base.html.tmpl",
-        "web/templates/index.html.tmpl",
-        "web/templates/game.html.tmpl",
-    ))
-    return &templates{t: t}
+    // Determine templates directory relative to current working directory (works in tests and at runtime).
+    candidates := []string{
+        "web/templates",
+        "../web/templates",
+        "../../web/templates",
+    }
+    var dir string
+    for _, c := range candidates {
+        if _, err := os.Stat(filepath.Join(c, "base.html.tmpl")); err == nil {
+            dir = c
+            break
+        }
+    }
+    if dir == "" {
+        log.Fatal("templates directory not found; looked in ", candidates)
+    }
+    basePath := filepath.Join(dir, "base.html.tmpl")
+    // Parse base, then clone for each page to avoid define name collisions.
+    base := template.Must(template.New("base.html.tmpl").Funcs(funcs).ParseFiles(basePath))
+    indexT := template.Must(template.Must(base.Clone()).ParseFiles(filepath.Join(dir, "index.html.tmpl")))
+    gameT := template.Must(template.Must(base.Clone()).ParseFiles(filepath.Join(dir, "game.html.tmpl")))
+    return &templates{index: indexT, game: gameT}
 }
 
 func (t *templates) render(w http.ResponseWriter, name string, data any) {
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     log.Printf("render template=%s", name)
-    if err := t.t.ExecuteTemplate(w, name, data); err != nil {
+    var err error
+    switch name {
+    case "index.html.tmpl":
+        err = t.index.ExecuteTemplate(w, name, data)
+    case "game.html.tmpl":
+        err = t.game.ExecuteTemplate(w, name, data)
+    default:
+        http.Error(w, "template not found", http.StatusInternalServerError)
+        return
+    }
+    if err != nil {
         log.Printf("template error name=%s err=%v", name, err)
         http.Error(w, "template render error", http.StatusInternalServerError)
         return
