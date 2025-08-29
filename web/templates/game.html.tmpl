@@ -4,10 +4,11 @@
 
 <div class="box" x-data="{ 
     cells: Array(9).fill(''), 
-    icon: (new URLSearchParams(window.location.search).get('icon') || '❌'),
+    icon: '',
+    init(){ this.icon = this.$el.dataset.myIcon || '❌' },
     mark(i){ if(this.cells[i] !== '') return; this.cells[i] = this.icon }, 
     reset(){ this.cells = Array(9).fill('') }
-  }">
+  }" :data-my-icon="'{{.MyIcon}}'" :data-opponent-icon="'{{.OpponentIcon}}'">
   <p class="mb-3">Your icon: <span x-text="icon"></span></p>
   <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-width: 360px;">
     <button type="button" class="button is-large is-fullwidth" x-text="cells[0]" @click="mark(0)"></button>

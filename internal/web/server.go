@@ -6,18 +6,20 @@ import (
     "time"
 
     "github.com/go-chi/chi/v5"
+    "github.com/jaminalder/codex-tic-tac-toe/internal/app"
 )
 
 // Server wires a chi router with minimal routes.
 type Server struct {
     router chi.Router
     t      *templates
+    svc    *app.Service
 }
 
 // NewServer constructs the HTTP handler with a single index route.
-func NewServer() http.Handler {
+func NewServer(svc *app.Service) http.Handler {
     t := mustLoadTemplates()
-    s := &Server{router: chi.NewRouter(), t: t}
+    s := &Server{router: chi.NewRouter(), t: t, svc: svc}
     s.routes()
     return s
 }
@@ -26,6 +28,11 @@ func (s *Server) routes() {
     s.router.Use(requestLogger())
     s.router.Get("/", s.handleIndex)
     s.router.Get("/game", s.handleGame)
+    s.router.Post("/game", s.handleCreateGame)
+    s.router.Get("/game/{id}/lobby", s.handleLobby)
+    s.router.Get("/game/{id}/lobby/status", s.handleLobbyStatus)
+    s.router.Post("/game/{id}/join", s.handleJoin)
+    s.router.Get("/game/{id}", s.handleGameID)
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

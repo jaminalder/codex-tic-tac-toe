@@ -23,6 +23,8 @@ type GameState struct {
     Game    domain.Game
     X       string
     O       string
+    IconX   string
+    IconO   string
     Created time.Time
     Updated time.Time
 }
@@ -217,4 +219,25 @@ func (s *Service) copySubsLocked(id string) map[*subscriber]struct{} {
         }
     }
     return out
+}
+
+// SetIcon sets the icon for the given side (X or O) for a game.
+// If the game does not exist, returns ErrNotFound.
+func (s *Service) SetIcon(id string, side domain.Cell, icon string) error {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+    gs, ok := s.games[id]
+    if !ok {
+        return ErrNotFound
+    }
+    switch side {
+    case domain.X:
+        gs.IconX = icon
+    case domain.O:
+        gs.IconO = icon
+    default:
+        // ignore for Empty
+    }
+    gs.Updated = time.Now()
+    return nil
 }

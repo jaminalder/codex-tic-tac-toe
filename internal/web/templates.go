@@ -11,6 +11,7 @@ import (
 type templates struct {
     index *template.Template
     game  *template.Template
+    lobby *template.Template
 }
 
 func mustLoadTemplates() *templates {
@@ -36,7 +37,8 @@ func mustLoadTemplates() *templates {
     base := template.Must(template.New("base.html.tmpl").Funcs(funcs).ParseFiles(basePath))
     indexT := template.Must(template.Must(base.Clone()).ParseFiles(filepath.Join(dir, "index.html.tmpl")))
     gameT := template.Must(template.Must(base.Clone()).ParseFiles(filepath.Join(dir, "game.html.tmpl")))
-    return &templates{index: indexT, game: gameT}
+    lobbyT := template.Must(template.Must(base.Clone()).ParseFiles(filepath.Join(dir, "lobby.html.tmpl")))
+    return &templates{index: indexT, game: gameT, lobby: lobbyT}
 }
 
 func (t *templates) render(w http.ResponseWriter, name string, data any) {
@@ -48,6 +50,8 @@ func (t *templates) render(w http.ResponseWriter, name string, data any) {
         err = t.index.ExecuteTemplate(w, name, data)
     case "game.html.tmpl":
         err = t.game.ExecuteTemplate(w, name, data)
+    case "lobby.html.tmpl":
+        err = t.lobby.ExecuteTemplate(w, name, data)
     default:
         http.Error(w, "template not found", http.StatusInternalServerError)
         return

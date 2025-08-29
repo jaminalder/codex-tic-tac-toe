@@ -5,11 +5,13 @@ import (
     "net/http/httptest"
     "strings"
     "testing"
+
+    "github.com/jaminalder/codex-tic-tac-toe/internal/app"
 )
 
 func TestIndexRouteReturnsHTML(t *testing.T) {
     t.Parallel()
-    h := NewServer()
+    h := NewServer(app.NewService())
     req := httptest.NewRequest(http.MethodGet, "/", nil)
     rr := httptest.NewRecorder()
     h.ServeHTTP(rr, req)
@@ -29,7 +31,7 @@ func TestIndexRouteReturnsHTML(t *testing.T) {
 
 func TestGameRouteReturnsHTML(t *testing.T) {
     t.Parallel()
-    h := NewServer()
+    h := NewServer(app.NewService())
     req := httptest.NewRequest(http.MethodGet, "/game", nil)
     rr := httptest.NewRecorder()
     h.ServeHTTP(rr, req)
@@ -46,4 +48,3 @@ func TestGameRouteReturnsHTML(t *testing.T) {
         t.Fatalf("expected game page header not found; body: %q", body)
     }
 }
-

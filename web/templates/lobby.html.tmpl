@@ -1,0 +1,43 @@
+{{ define "content" }}
+<h1 class="title">Lobby</h1>
+<p class="subtitle">Share the link and wait for your opponent</p>
+
+<div class="box" x-data>
+  <p class="mb-2">Game link:</p>
+  <div class="field has-addons">
+    <div class="control is-expanded">
+      <input class="input" type="text" readonly value="{{.ShareURL}}" @focus="$el.select()">
+    </div>
+    <div class="control">
+      <button type="button" class="button" @click="navigator.clipboard.writeText('{{.ShareURL}}')">Copy</button>
+    </div>
+  </div>
+
+  {{ if eq .Seat "X" }}
+    {{ if .HasO }}
+      <p class="mt-3">Opponent joined! Redirecting…</p>
+    {{ else }}
+      <p class="mt-3">Waiting for opponent to join…</p>
+      <div hx-get="/game/{{.ID}}/lobby/status" hx-trigger="every 2s" hx-swap="none"></div>
+    {{ end }}
+  {{ else if and (not .HasO) (ne .Seat "O") }}
+    <hr>
+    <p class="mb-2">Join the game by selecting your icon:</p>
+    <form method="post" action="/game/{{.ID}}/join" x-data="{ icons:['😺','🤖','🐶','👾','🦄','🐸','🐼','🐙'], sel:'' }" @submit.prevent="if(sel){ $root.submit() }">
+      <div class="buttons">
+        <template x-for="(ic, idx) in icons" :key="idx">
+          <button type="button" class="button is-light" :class="{ 'is-info': sel===ic }" x-text="ic" @click="sel=ic"></button>
+        </template>
+      </div>
+      <input type="hidden" name="icon" :value="sel">
+      <button type="submit" class="button is-primary" :disabled="!sel">Join Game</button>
+    </form>
+  {{ end }}
+
+  <p class="is-size-7 has-text-grey mt-4">Icons — X: {{.IconX}} | O: {{.IconO}}</p>
+  <p class="is-size-7 has-text-grey">This page polls every 2s; redirects when ready.</p>
+</div>
+{{ end }}
+
+{{ template "base.html.tmpl" . }}
+
