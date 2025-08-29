@@ -1,0 +1,20 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Build the server binary into tmp and run it.
+cmd = "go build -o ./tmp/ttt-server ./cmd/ttt-server"
+bin = "tmp/ttt-server"
+delay = 100
+stop_on_error = true
+kill_delay = 500
+
+# Watch for changes in Go and template files (and common web files).
+include_ext = ["go", "tmpl", "html", "css", "js"]
+exclude_dir = ["tmp", "vendor", ".git", ".gocache", ".gomodcache"]
+exclude_regex = ["_test\\.go$"]
+
+[log]
+time = true
+color = true
+
