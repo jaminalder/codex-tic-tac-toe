@@ -53,15 +53,9 @@ func (s *Server) handleCreateGame(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleLobby(w http.ResponseWriter, r *http.Request) {
     id := chi.URLParam(r, "id")
     pid := ensurePlayerID(w, r)
-    // Idempotent join to claim seat if available
-    s.svc.Join(id, pid)
     st, ok := s.svc.Get(id)
     if !ok {
         http.NotFound(w, r)
-        return
-    }
-    if st.X != "" && st.O != "" {
-        http.Redirect(w, r, "/game/"+id, http.StatusSeeOther)
         return
     }
     // self seat
@@ -71,6 +65,11 @@ func (s *Server) handleLobby(w http.ResponseWriter, r *http.Request) {
     } else if st.O == pid {
         seat = "O"
     }
+    if st.X != "" && st.O != "" {
+        // Both seats filled; if viewer is a player, go to game page
+        http.Redirect(w, r, "/game/"+id, http.StatusSeeOther)
+        return
+    }
     s.t.render(w, "lobby.html.tmpl", map[string]any{
         "Title":   "Lobby",
         "ID":      id,
@@ -78,7 +77,7 @@ func (s *Server) handleLobby(w http.ResponseWriter, r *http.Request) {
         "HasO":    st.O != "",
         "IconX":   st.IconX,
         "IconO":   st.IconO,
-        "ShareURL": "/game/" + id,
+        "ShareURL": absoluteURL(r, "/game/"+id+"/lobby"),
     })
 }
 
