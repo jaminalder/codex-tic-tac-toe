@@ -1,15 +1,29 @@
 {{ define "content" }}
 <h1 class="title">Game</h1>
-<p class="subtitle">Static placeholder page (no gameplay yet)</p>
+<p class="subtitle">Click a cell to place a random X or O</p>
 
-<div class="box">
-  <p>This page will host the Tic‑Tac‑Toe board, realtime updates, and controls.</p>
-  <p class="mt-3">
-    <a href="/" class="button">Back to Home</a>
-  </p>
-  <p class="is-size-7 has-text-grey mt-3">Bulma, HTMX, Alpine are already loaded via the base layout.</p>
-</div>
+<div class="box" x-data="{ 
+    cells: Array(9).fill(''), 
+    mark(i){ if(this.cells[i] !== '') return; this.cells[i] = Math.random() < 0.5 ? 'X' : 'O' }, 
+    reset(){ this.cells = Array(9).fill('') }
+  }">
+  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-width: 360px;">
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[0]" @click="mark(0)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[1]" @click="mark(1)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[2]" @click="mark(2)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[3]" @click="mark(3)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[4]" @click="mark(4)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[5]" @click="mark(5)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[6]" @click="mark(6)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[7]" @click="mark(7)"></button>
+    <button type="button" class="button is-large is-fullwidth" x-text="cells[8]" @click="mark(8)"></button>
+  </div>
+  <div class="mt-4">
+    <button type="button" class="button" @click="reset()">Reset</button>
+    <a href="/" class="button is-light ml-2">Back to Home</a>
+  </div>
+  <p class="is-size-7 has-text-grey mt-3">No server logic yet — purely client-side using Alpine.js.</p>
+  </div>
 {{ end }}
 
 {{ template "base.html.tmpl" . }}
-
